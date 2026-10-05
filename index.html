@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mandados & Moto-Taxi Ya - Tu movilidad local</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0f172a; color: #f8fafc; line-height: 1.6; }
+        
+        header { display: flex; justify-content: space-between; align-items: center; padding: 20px 8%; background: #1e293b; border-bottom: 1px solid #334155; position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 24px; font-weight: bold; color: #ef4444; display: flex; align-items: center; gap: 8px; }
+        .nav-btn { background-color: #22c55e; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; transition: 0.3s; }
+        .nav-btn:hover { background-color: #16a34a; }
+
+        .hero { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 70px 20px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
+        .hero h1 { font-size: 40px; margin-bottom: 20px; color: #fff; max-width: 800px; }
+        .hero h1 span { color: #ef4444; }
+        .hero p { font-size: 18px; color: #94a3b8; max-width: 600px; margin-bottom: 30px; }
+        
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; padding: 40px 8%; width: 100%; max-width: 1000px; }
+        .service-card { background: #1e293b; padding: 30px; border-radius: 12px; border: 1px solid #334155; text-align: center; transition: 0.3s; }
+        .service-card:hover { transform: translateY(-5px); border-color: #ef4444; }
+        .service-card h3 { font-size: 22px; margin-bottom: 10px; color: #f8fafc; }
+        .service-card p { color: #94a3b8; font-size: 15px; margin-bottom: 20px; }
+        .btn-service { display: inline-block; background-color: #ef4444; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; transition: 0.3s; }
+        .btn-service:hover { background-color: #dc2626; }
+
+        footer { text-align: center; padding: 30px; background: #1e293b; color: #64748b; border-top: 1px solid #334155; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">🛵 Mandados & Moto-Taxi Ya</div>
+        <a href="index.html" class="nav-btn">Abrir App</a>
+    </header>
+
+    <section class="hero">
+        <h1>Tu ciudad conectada: <span>Viajes y Domicilios al Instante</span></h1>
+        <p>Pide tu transporte en moto o solicita un domicilio local directo al WhatsApp del conductor más cercano. Cero comisiones abusivas.</p>
+        
+        <div class="services-grid">
+            <div class="service-card">
+                <h3>🏍️ Moto-Taxi Express</h3>
+                <p>Llega rápido a tu destino de forma ágil y segura esquivando el tráfico urbano.</p>
+                <a href="index.html?tipo=transporte" class="btn-service">Pedir Moto-Taxi</a>
+            </div>
+            <div class="service-card">
+                <h3>📦 Mandados y Domicilios</h3>
+                <p>Envía paquetes, documentos o pide tus compras locales directamente con un repartidor.</p>
+                <a href="index.html?tipo=domicilio" class="btn-service">Pedir Domicilio</a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 Mandados & Moto-Taxi Ya. Impulsando la economía local.</p>
+    </footer>
+
+</body>
+</html>

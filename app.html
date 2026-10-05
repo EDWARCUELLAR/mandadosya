@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitud - Moto-Taxi & Domicilios</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+        h2 { color: #d32f2f; text-align: center; }
+        .badge { background: #ffebee; color: #c62828; padding: 5px 10px; border-radius: 5px; font-size: 14px; text-align: center; margin-bottom: 15px; font-weight: bold; }
+        label { font-weight: bold; display: block; margin-top: 10px; }
+        input, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { background-color: #25d366; color: white; border: none; padding: 12px; width: 100%; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        button:hover { background-color: #1ebe5d; }
+        .driver-card { background: #e8f5e9; padding: 10px; border-radius: 5px; margin-top: 15px; }
+        .gps-btn { background-color: #0277bd; margin-bottom: 5px; margin-top: 5px; }
+        .helper-text { font-size: 12px; color: #666; margin-top: 2px; }
+        .back-link { display: block; text-align: center; margin-top: 15px; color: #555; text-decoration: none; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Solicitud en Línea 🛵</h2>
+    <div id="tipoServicioBadge" class="badge">Cargando servicio...</div>
+
+    <form id="serviceForm">
+        <label>Ubicación de Recogida:</label>
+        <input type="text" id="origenTexto" placeholder="Ej. Calle 10 # 5-23" required>
+        <button type="button" class="gps-btn" id="obtenerUbicacion">📍 O usar mi GPS actual</button>
+        <div class="helper-text" id="gpsStatus">Escribe tu dirección o usa el GPS</div>
+
+        <label>Destino (Llegada):</label>
+        <input type="text" id="destino" placeholder="Ej. Centro Comercial / Barrio" required>
+
+        <!-- Campo dinámico que cambia si es paquete o pasajero -->
+        <div id="campoDinamicoContainer">
+            <label id="labelDinamico">Detalle:</label>
+            <textarea id="detalleExtra" rows="2" placeholder="Especificaciones..."></textarea>
+        </div>
+
+        <label>Tu Teléfono de Contacto:</label>
+        <input type="tel" id="telefono" placeholder="Ej. 3101234567" required>
+
+        <button type="submit" id="btnSubmit">Buscar Conductor Cercano</button>
+    </form>
+
+    <div id="resultado"></div>
+    <a href="landing.html" class="back-link">← Volver al inicio</a>
+</div>
+
+<script>
+    // Detectar si el usuario eligió transporte o domicilio desde la landing
+    const urlParams = new URLSearchParams(window.location.search);
+    const tipoServicio = urlParams.get('tipo') || 'transporte'; // por defecto transporte
+
+    const badge = document.getElementById('tipoServicioBadge');
+    const labelDinamico = document.getElementById('labelDinamico');
+    const detalleExtra = document.getElementById('detalleExtra');
+
+    if(tipoServicio === 'domicilio') {
+        badge.innerText = "📦 Servicio de Domicilio / Mensajería";
+        labelDinamico.innerText = "Descripción del paquete:";
+        detalleExtra.placeholder = "Ej. Almuerzo, documentos, caja pequeña...";
+    } else {
+        badge.innerText = "🏍️ Servicio de Moto-Taxi (Pasajero)";
+        labelDinamico.innerText = "Indicaciones para el conductor:";
+        detalleExtra.placeholder = "Ej. Voy con casco / Maleta grande...";
+    }
+
+    let latPasajero = null;
+    let lngPasajero = null;
+
+    document.getElementById('obtenerUbicacion').addEventListener('click', () => {
+        const origenTexto = document.getElementById('origenTexto');
+        const gpsStatus = document.getElementById('gpsStatus');
+        
+        if (navigator.geolocation) {
+            gpsStatus.innerText = "Obteniendo satélites GPS...";
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    latPasajero = position.coords.latitude;
+                    lngPasajero = position.coords.longitude;
+                    origenTexto.value = `GPS: ${latPasajero.toFixed(4)}, ${lngPasajero.toFixed(4)}`;
+                    gpsStatus.innerText = "¡Ubicación GPS aplicada con éxito!";
+                },
+                (error) => {
+                    gpsStatus.innerText = "Error GPS. Escribe tu dirección manual.";
+                }
+            );
+        } else {
+            alert("Tu navegador no soporta geolocalización.");
+        }
+    });
+
+    document.getElementById('serviceForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const origen = document.getElementById('origenTexto').value;
+        const destino = document.getElementById('destino').value;
+        const detalle = detalleExtra.value;
+        const telefono = document.getElementById('telefono').value;
+        const resultadoDiv = document.getElementById('resultado');
+        
+        resultadoDiv.innerHTML = "<p>Buscando conductor en moto disponible...</p>";
+
+        try {
+            const respuesta = await fetch('http://localhost:3000/api/buscar-conductor', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    tipoServicio,
+                    origenTexto: origen, 
+                    latPasajero, 
+                    lngPasajero, 
+                    destino, 
+                    detalle, 
+                    telefono 
+                })
+            });
+            
+            const data = await respuesta.json();
+
+            if(data.success) {
+                resultadoDiv.innerHTML = `
+                    <div class="driver-card">
+                        <h3>¡Conductor Asignado!</h3>
+                        <p><strong>Conductor:</strong> ${data.conductor.nombre}</p>
+                        <p><strong>Moto:</strong> ${data.conductor.vehiculo} (${data.conductor.placa})</p>
+                        <p><strong>Distancia:</strong> ${data.conductor.distanciaKm}</p>
+                        <p><strong>Tiempo estimado:</strong> ${data.conductor.tiempo}</p>
+                        <a href="${data.whatsappUrl}" target="_blank">
+                            <button style="background-color: #128c7e;">Contactar por WhatsApp</button>
+                        </a>
+                    </div>
+                `;
+            } else {
+                resultadoDiv.innerHTML = "<p style='color: red;'>No hay conductores disponibles.</p>";
+            }
+        } catch (error) {
+            resultadoDiv.innerHTML = "<p style='color: red;'>Error conectando con el servidor.</p>";
+        }
+    });
+</script>
+
+</body>
+</html>
